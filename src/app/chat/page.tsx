@@ -100,17 +100,25 @@ How can I help you today?`,
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Atualizar mensagem inicial quando idioma mudar
+  // Atualizar mensagem inicial quando idioma mudar - otimizado
   useEffect(() => {
-    setMessages([
-      {
-        id: '1',
-        content: getInitialMessage(),
-        role: 'assistant',
-        timestamp: new Date(),
-        type: 'text'
-      }
-    ]);
+    let isMounted = true;
+    
+    if (isMounted) {
+      setMessages([
+        {
+          id: '1',
+          content: getInitialMessage(),
+          role: 'assistant',
+          timestamp: new Date(),
+          type: 'text'
+        }
+      ]);
+    }
+    
+    return () => {
+      isMounted = false;
+    };
   }, [language]);
 
   // Auto-scroll para a última mensagem

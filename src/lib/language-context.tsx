@@ -15,27 +15,44 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>('pt');
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Hidratação segura e otimizada
+  // Hidratação segura e otimizada - executa apenas uma vez
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let isMounted = true;
+    
+    const initializeLanguage = () => {
+      if (!isMounted) return;
+      
       setIsHydrated(true);
       
       // Carrega idioma salvo apenas após hidratação
       if (typeof window !== 'undefined') {
         try {
           const savedLanguage = window.localStorage.getItem('language') as Language;
-          if (savedLanguage && translations[savedLanguage]) {
+          if (savedLanguage && translations[savedLanguage] && isMounted) {
             setLanguage(savedLanguage);
           }
         } catch (error) {
           // Ignora erros de localStorage silenciosamente
-          console.warn('Erro ao carregar idioma do localStorage:', error);
         }
       }
-    }, 100); // Pequeno delay para evitar problemas de hidratação
+    };
 
-    return () => clearTimeout(timer);
-  }, []);
+    // Executa imediatamente se já estiver no cliente
+    if (typeof window !== 'undefined') {
+      initializeLanguage();
+    } else {
+      // Pequeno delay apenas durante SSR
+      const timer = setTimeout(initializeLanguage, 50);
+      return () => {
+        clearTimeout(timer);
+        isMounted = false;
+      };
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Array vazio - executa apenas uma vez
 
   // Salva idioma no localStorage de forma segura
   const handleLanguageChange = (newLanguage: Language) => {
@@ -46,23 +63,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         window.localStorage.setItem('language', newLanguage);
       } catch (error) {
         // Ignora erros de localStorage silenciosamente
-        console.warn('Erro ao salvar idioma no localStorage:', error);
       }
     }
   };
 
   // Função de tradução com fallback robusto
   const t = (key: TranslationKey): string => {
-    if (!isHydrated) {
-      // Durante SSR, usa português como padrão
-      return translations.pt[key] || key;
-    }
-    
     try {
+      // Sempre retorna uma tradução válida
       const translation = translations[language]?.[key] || translations.pt[key] || key;
       return translation;
     } catch (error) {
-      console.warn(`Erro na tradução para chave "${key}":`, error);
+      // Fallback para a chave original em caso de erro
       return key;
     }
   };

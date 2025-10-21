@@ -15,24 +15,44 @@ export function Header() {
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Gerenciamento de tema simplificado sem next-themes
+  // Gerenciamento de tema simplificado e otimizado
   useEffect(() => {
-    setMounted(true);
+    let isMounted = true;
     
-    // Verifica tema inicial de forma mais robusta
-    try {
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    const initializeTheme = () => {
+      if (!isMounted) return;
       
-      setIsDark(shouldBeDark);
-      document.documentElement.classList.toggle('dark', shouldBeDark);
-    } catch (error) {
-      // Fallback para tema claro se houver erro
-      setIsDark(false);
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
+      setMounted(true);
+      
+      // Verifica tema inicial de forma mais robusta
+      try {
+        if (typeof window !== 'undefined') {
+          const savedTheme = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+          
+          if (isMounted) {
+            setIsDark(shouldBeDark);
+            document.documentElement.classList.toggle('dark', shouldBeDark);
+          }
+        }
+      } catch (error) {
+        // Fallback para tema claro se houver erro
+        if (isMounted) {
+          setIsDark(false);
+          if (typeof document !== 'undefined') {
+            document.documentElement.classList.remove('dark');
+          }
+        }
+      }
+    };
+
+    initializeTheme();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Array vazio - executa apenas uma vez
 
   const toggleTheme = () => {
     if (!mounted) return;
@@ -40,8 +60,14 @@ export function Header() {
     try {
       const newTheme = !isDark;
       setIsDark(newTheme);
-      document.documentElement.classList.toggle('dark', newTheme);
-      localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+      
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.toggle('dark', newTheme);
+      }
+      
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+      }
     } catch (error) {
       // Ignora erros de localStorage
     }

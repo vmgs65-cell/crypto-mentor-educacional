@@ -100,13 +100,21 @@ export default function Cotacoes() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLive, setIsLive] = useState(true);
 
-  // Simular atualizações em tempo real
+  // Simular atualizações em tempo real - otimizado para evitar loops
   useEffect(() => {
+    let isMounted = true;
+    
     const interval = setInterval(() => {
-      setIsLive(prev => !prev);
+      if (isMounted) {
+        setIsLive(prev => !prev);
+      }
     }, 2000);
-    return () => clearInterval(interval);
-  }, []);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []); // Array vazio - executa apenas uma vez
 
   const newsData = [
     {

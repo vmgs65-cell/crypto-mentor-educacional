@@ -2,25 +2,29 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-// Import optimized fonts
-import "../lib/fonts";
 import { LanguageProvider } from "@/lib/language-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  display: "swap", // Optimize font loading
+  display: "swap",
+  preload: true,
+  fallback: ['ui-sans-serif', 'system-ui', 'sans-serif'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+  variable: "--font-geist-mono", 
   subsets: ["latin"],
-  display: "swap", // Optimize font loading
+  display: "swap",
+  preload: true,
+  fallback: ['ui-monospace', 'SFMono-Regular', 'monospace'],
 });
 
 export const metadata: Metadata = {
   title: "Crypto Mentor Brasil",
   description: "Aplicativo educacional para aprender sobre criptomoedas em português do Brasil",
+  robots: "index, follow",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
@@ -29,9 +33,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <LanguageProvider>
           {children}

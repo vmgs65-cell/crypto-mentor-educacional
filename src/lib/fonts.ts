@@ -2,28 +2,20 @@
  * 🎨 Font Configuration for Lasy AI Templates
  * 
  * Optimized font loading to prevent build timeouts.
- * Only essential fonts are loaded to improve build performance.
+ * Uses system fonts and Next.js built-in fonts only.
  */
-
-// Essential Geist Fonts (Vercel's official fonts) - Only core weights
-import '@fontsource/geist-sans/400.css'
-import '@fontsource/geist-sans/600.css'
-import '@fontsource/geist-mono/400.css'
-
-// Essential Inter font - Only core weights
-import '@fontsource/inter/400.css'
-import '@fontsource/inter/600.css'
 
 /**
  * Font family configurations for easy use
+ * Using system fonts and Next.js built-in fonts to prevent build issues
  */
 export const fontFamilies = {
-  // Sans-serif fonts
-  geist: '"Geist Sans", ui-sans-serif, system-ui, sans-serif',
-  inter: '"Inter", ui-sans-serif, system-ui, sans-serif',
+  // Sans-serif fonts - using system fonts for reliability
+  geist: 'var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif',
+  inter: 'Inter, ui-sans-serif, system-ui, sans-serif',
   
   // Monospace fonts
-  geistMono: '"Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", monospace',
+  geistMono: 'var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono", monospace',
 } as const
 
 /**
@@ -43,7 +35,7 @@ export const tailwindFontConfig = {
   fontFamily: {
     'geist-sans': ['var(--font-geist-sans)'],
     'geist-mono': ['var(--font-geist-mono)'],
-    'inter': ['var(--font-inter)'],
+    'inter': ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
   }
 }
 
